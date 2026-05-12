@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using ExcelDataReader;
-
+using ClosedXML.Excel;
+using System.Reflection;
 // Required for .NET Core to support additional encodings
 namespace App1{
 public class Model
@@ -135,7 +136,9 @@ foreach(var m in models){
     _типыпарковки.Add(m._Парковка as string);
     _типвхода.Add(m._Вид_входа as string);
 }
-var resm=new List<OutModel>();
+var resm=new List<OutModel>[6];
+for(int i=0;i<6;i++)
+resm[i]=new List<OutModel>();
 foreach(var m in models){
     if(Convert.ToBoolean(m._Учитывать_ли_строку_при_обработке_данных_)==true){
         var omod=new OutModel();
@@ -150,18 +153,20 @@ foreach(var m in models){
         omod._Находится_в_ТЦ=(Convert.ToBoolean(m._Находится_в_ТЦ )==true)?1:0;
         omod._Количество_Конкурентов=(m._Идентификаторы_конкурентов_ as string[]).Length;
         omod._Парковка=m._Парковка as string;
+        
+        omod._ТипПарковки=Array.IndexOf(_типыпарковки.ToArray(),omod._Парковка);
         if(omod._Парковка!=null){
             omod._Парковка=omod._Парковка.Replace(" ","_").Replace(",","_");
         }
-        omod._ТипПарковки=Array.IndexOf(_типыпарковки.ToArray(),omod._Парковка);
         omod._Вид_входа=m._Вид_входа as string;
+        
+        omod._ТипВхода=Array.IndexOf(_типвхода.ToArray(),omod._Вид_входа);
         if(omod._Вид_входа!=null){
             omod._Вид_входа=omod._Вид_входа.Replace(" ","_").Replace(",","_");
         }
-        omod._ТипВхода=Array.IndexOf(_типвхода.ToArray(),omod._Вид_входа);
-        if(omod._ТипВхода!=null){
+        /*if(omod._Парковка!=null){
             omod._ТипВхода=omod._ТипВхода.Replace(" ","_").Replace(",","_");
-        }
+        }*/
         omod._Этаж =Convert.ToInt32( m._Этаж) ;
         omod._Среднее_кол_во_отзывов_в_год_до_01_01_2026_=Convert.ToDouble(m._Среднее_кол_во_отзывов_в_год_до_01_01_2026_);
         omod._Количество_отзывов_до_01_01_2026_=Convert.ToInt32(m._Количество_отзывов_до_01_01_2026_);
@@ -180,8 +185,89 @@ foreach(var m in models){
             omod._ВыходнаяОценка=5;
         }
         //omod._Идентификатор=m._Идентификатор as int;
+        resm[omod._ВыходнаяОценка].Add(omod);
     }
 }
 
+using(var workbook=new XLWorkbook())
+{
+    for(int i=0;i<6;i++){
+        var worksheet=workbook.Worksheets.Add($" оценка{i}");
+        int cur_row=1;
+        //cur_row++;
+        int cur_col=1;
+        //https://www.google.com/search?q=c%23+%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C+%D0%B2%D1%81%D0%B5+%D0%B7%D0%BD%D0%B0%D1%87%D0%B8%D1%8F+%D1%81%D0%B2%D0%BE%D0%B9%D1%81%D1%82%D0%B2+%D0%BA%D0%BB%D0%B0%D1%81%D1%81%D0%B0&newwindow=1&sca_esv=64f192ab416146fe&sxsrf=ANbL-n5gySJSP339h2DwC4TzAxR4lXOiZA%3A1778607904945&ei=IGcDatSrOa2OwPAPgqCm2AU&biw=1280&bih=630&ved=0ahUKEwjUu_niprSUAxUtBxAIHQKQCVsQ4dUDCBE&uact=5&oq=c%23+%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C+%D0%B2%D1%81%D0%B5+%D0%B7%D0%BD%D0%B0%D1%87%D0%B8%D1%8F+%D1%81%D0%B2%D0%BE%D0%B9%D1%81%D1%82%D0%B2+%D0%BA%D0%BB%D0%B0%D1%81%D1%81%D0%B0&gs_lp=Egxnd3Mtd2l6LXNlcnAiQ2MjINC_0L7Qu9GD0YfQuNGC0Ywg0LLRgdC1INC30L3QsNGH0LjRjyDRgdCy0L7QudGB0YLQsiDQutC70LDRgdGB0LAyDBAhGCoYoAEYwwQYCkjPO1D4D1jhLnABeAGQAQCYAc0BoAHaDqoBBjAuMTEuMbgBA8gBAPgBAZgCC6ACoQzCAgoQABhHGNYEGLADwgIFEAAY7wXCAgwQIRgKGKABGMMEGCrCAgoQIRgKGKABGMMEmAMA4gMFEgExIECIBgGQBgOSBwQxLjEwoAfDN7IHBDAuMTC4B5EMwgcFMi43LjLIBxiACAE&sclient=gws-wiz-serp
+        var fields = typeof(OutModel).GetProperties(BindingFlags.Public|BindingFlags.Instance);
+        foreach(var f in fields){
+            worksheet.Cell(cur_row,cur_col++).Value=f.Name;
+        }
+        cur_row++;
+        foreach(OutModel r in resm[i]){
+            cur_col=1;
+            /*worksheet.Cell(cur_row,cur_col++).Value=r._Название;
+            worksheet.Cell(cur_row,cur_col++).Value=r._Улица;
+            worksheet.Cell(cur_row,cur_col++).Value=r._Находится_в_ТЦ;*/
+            Type type =r.GetType();
+              PropertyInfo[] properties = type.GetProperties();
+            foreach(var f in properties){
+                object val_=f.GetValue(r);
+                if(val_ is double){
+                  worksheet.Cell(cur_row,cur_col++).Value= Convert.ToDouble(val_); 
+                }else if(val_ is int){
+                     worksheet.Cell(cur_row,cur_col++).Value= Convert.ToInt32(val_);
+                }else{
+                     worksheet.Cell(cur_row,cur_col++).Value= Convert.ToString(val_);
+                }
+                
+            }
+            cur_row++;
+        }
+
+    }
+    {
+        var worksheet=workbook.Worksheets.Add($"Все Значения");
+        var fields = typeof(OutModel).GetProperties(BindingFlags.Public|BindingFlags.Instance);
+        int cur_row=1,cur_col=1;
+        foreach(var f in fields){
+            worksheet.Cell(cur_row,cur_col++).Value=f.Name;
+        }
+        cur_row++;
+        foreach(var r in resm){
+            foreach(var val in r){
+                Type type =val.GetType();
+                PropertyInfo[] properties = type.GetProperties();
+                cur_col=1;
+                foreach(var f in properties)
+                {
+                object val_=f.GetValue(val);
+                if(val_ is double){
+                  worksheet.Cell(cur_row,cur_col++).Value= Convert.ToDouble(val_); 
+                }else if(val_ is int){
+                     worksheet.Cell(cur_row,cur_col++).Value= Convert.ToInt32(val_);
+                }else{
+                     worksheet.Cell(cur_row,cur_col++).Value= Convert.ToString(val_);
+                }
+                
+                }
+                cur_row++;
+            }
+        }
+    }
+    {
+        var worksheet=workbook.Worksheets.Add($"Соответвия кодов и значений");
+        int cur_row=1;
+        var ar1=_типыпарковки.ToArray();
+        for(int i=0;i<ar1.Length;i++){
+            worksheet.Cell(cur_row,1).Value=i;
+            worksheet.Cell(cur_row++,2).Value=ar1[i];
+        }
+        var ar2=_типвхода.ToArray();
+        for(int i=0;i<ar2.Length;i++){
+            worksheet.Cell(cur_row,1).Value=i;
+            worksheet.Cell(cur_row++,2).Value=ar2[i];
+        }
+    }
+    workbook.SaveAs("ДанныеПоВыходОценкам.xlsx");
+}
 }}
 }
