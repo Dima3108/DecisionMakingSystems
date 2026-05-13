@@ -35,8 +35,9 @@ public class OutModel
     public Double _Средняя_оценка_по_данным_яндекс_карт{get;set;}
     public double _Количество_отзывов_до_01_01_2026_{get;set;}
     public double _Среднее_кол_во_отзывов_в_год_до_01_01_2026_{get;set;}
+    public double _ДоляОтносительно_МаксСреднего_по_отзывам{get;set;}
     public int _ВыходнаяОценка{get;set;}
-
+    
 }
 public class Program
 {
@@ -116,15 +117,15 @@ for(int n=0;n<models.Length;n++)
         models[n]._Средняя_оценка_по_данным_яндекс_карт=Convert.ToDouble(0);
     }
     string _колво_отзывов=inpValues[n+1][apos++];
-    if(Double.TryParse(_колво_отзывов,out v)){
-         models[n]._Количество_отзывов_до_01_01_2026_=v;
+    if(Double.TryParse(_колво_отзывов,out double v1)){
+         models[n]._Количество_отзывов_до_01_01_2026_=v1;
     }else{
         models[n]._Количество_отзывов_до_01_01_2026_=Convert.ToDouble(0);
     }
 
     string _среднееколвоотзывов=inpValues[n+1][apos++];
-    if(Double.TryParse(_среднееколвоотзывов,out v)){
-         models[n]._Среднее_кол_во_отзывов_в_год_до_01_01_2026_=v;
+    if(Double.TryParse(_среднееколвоотзывов,out double v2)){
+         models[n]._Среднее_кол_во_отзывов_в_год_до_01_01_2026_=v2;
     }else{
         models[n]._Среднее_кол_во_отзывов_в_год_до_01_01_2026_=Convert.ToDouble(0);
     }
@@ -132,16 +133,31 @@ for(int n=0;n<models.Length;n++)
 }
 HashSet<string>_типыпарковки=new HashSet<string>();
 HashSet<string>_типвхода=new HashSet<string>();
+double _макс_сред_число_отзывов=Convert.ToDouble(models[0]._Среднее_кол_во_отзывов_в_год_до_01_01_2026_);
+int max_id=Convert.ToInt32(models[0]._Идентификатор);
 foreach(var m in models){
+
     _типыпарковки.Add(m._Парковка as string);
     _типвхода.Add(m._Вид_входа as string);
+    if(Convert.ToBoolean(m._Учитывать_ли_строку_при_обработке_данных_)){
+        double tmp_=Convert.ToDouble(m._Среднее_кол_во_отзывов_в_год_до_01_01_2026_);
+    if(tmp_==0||(tmp_>0&&tmp_!=Convert.ToDouble(m._Количество_отзывов_до_01_01_2026_)))
+    if(tmp_>_макс_сред_число_отзывов){
+        _макс_сред_число_отзывов=tmp_;
+    }
+    }
 }
+
+Console.WriteLine($"максимум отзывов={_макс_сред_число_отзывов} у записи='{max_id}'");
 var resm=new List<OutModel>[6];
 for(int i=0;i<6;i++)
 resm[i]=new List<OutModel>();
 foreach(var m in models){
     if(Convert.ToBoolean(m._Учитывать_ли_строку_при_обработке_данных_)==true){
-        var omod=new OutModel();
+        double tmp_=Convert.ToDouble(m._Среднее_кол_во_отзывов_в_год_до_01_01_2026_);
+        if(tmp_==0||(tmp_>0&&tmp_!=Convert.ToDouble(m._Количество_отзывов_до_01_01_2026_)))
+        {
+            var omod=new OutModel();
         omod._Название=m._Название as string;
         if(omod._Название!=null){
             omod._Название=omod._Название.Replace(" ","_").Replace(",","_");
@@ -184,10 +200,13 @@ foreach(var m in models){
         }else{
             omod._ВыходнаяОценка=5;
         }
+        omod._ДоляОтносительно_МаксСреднего_по_отзывам=(omod._Среднее_кол_во_отзывов_в_год_до_01_01_2026_/_макс_сред_число_отзывов)*100;
         //omod._Идентификатор=m._Идентификатор as int;
         resm[omod._ВыходнаяОценка].Add(omod);
+        }
     }
 }
+
 
 using(var workbook=new XLWorkbook())
 {
