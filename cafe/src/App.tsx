@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Theme = 'light' | 'dark';
@@ -194,13 +194,14 @@ interface SelectFieldProps {
   value: string;
   onChange: (v: string) => void;
   required?: boolean;
+  disabled?: boolean;
   options: { value: string; label: string }[];
   placeholder: string;
 }
-function SelectField({ id, label, value, onChange, required, options, placeholder }: SelectFieldProps) {
+function SelectField({ id, label, value, onChange, required, disabled, options, placeholder }: SelectFieldProps) {
   return (
     <Field label={label}>
-      <select id={id} value={value} onChange={e => onChange(e.target.value)} required={required}>
+      <select id={id} value={value} onChange={e => onChange(e.target.value)} required={required} disabled={disabled}>
         <option value="">{placeholder}</option>
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
@@ -260,8 +261,10 @@ function EntryCard({ entry, lang }: { entry: Entry; lang: Lang }) {
       <dl style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 1rem', fontSize: 'var(--text-sm)', margin: 0 }}>
         {rows.map(([label, val]) => (
           val ? (
-            <><dt key={`dt-${label}`} style={{ color: 'var(--color-text-muted)', fontWeight: 700 }}>{label}</dt>
-              <dd key={`dd-${label}`} style={{ margin: 0 }}>{val}</dd></>
+            <Fragment key={label}>
+              <dt style={{ color: 'var(--color-text-muted)', fontWeight: 700 }}>{label}</dt>
+              <dd style={{ margin: 0 }}>{val}</dd>
+            </Fragment>
           ) : null
         ))}
       </dl>
@@ -307,7 +310,7 @@ export default function App() {
 
   const tr = (path: string) => t(lang, path);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const entry: Entry = {
       customer: customer.trim(),
@@ -321,12 +324,34 @@ export default function App() {
       notes: notes.trim(),
       timestamp: formatNow(lang),
     };
-    setEntries(prev => [entry, ...prev]);
-    // reset
-    setCustomer(''); setCuisine(''); setLocation('');
-    setCompetitors(''); setParking(''); setEntrance('');
-    setAvgCheck(''); setAnchor(''); setNotes('');
-    setTimeout(() => customerRef.current?.focus(), 50);
+
+    try {
+      // Send POST to backend
+      const backendUrl = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/cafe/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const message = await response.text();
+      
+      // Add to entries (show locally)
+      setEntries(prev => [entry, ...prev]);
+      
+      // Show success message in console
+      console.log('Backend response:', message);
+      
+      // Reset form
+      setCustomer(''); setCuisine(''); setLocation('');
+      setCompetitors(''); setParking(''); setEntrance('');
+      setAvgCheck(''); setAnchor(''); setNotes('');
+      setTimeout(() => customerRef.current?.focus(), 50);
+    } catch (error) {
+      console.error('Error sending data to backend:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   const latest = entries[0];
@@ -586,7 +611,7 @@ export default function App() {
                   label={tr('form.labels.anchor')}
                   value={anchor}
                   onChange={setAnchor}
-                  required
+                  disabled={true}
                   options={anchorOptions}
                   placeholder={tr('form.placeholders.anchor')}
                 />
