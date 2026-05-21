@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "dgSpecHash": "U8cRf6mxz1Y=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Дмитрий\\Github\\DecisionMakingSystems\\предобработка\\app1\\app1.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\closedxml\\0.105.0\\closedxml.0.105.0.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\closedxml.parser\\2.0.0\\closedxml.parser.2.0.0.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\documentformat.openxml\\3.1.1\\documentformat.openxml.3.1.1.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\documentformat.openxml.framework\\3.1.1\\documentformat.openxml.framework.3.1.1.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\exceldatareader\\3.8.0\\exceldatareader.3.8.0.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\exceldatareader.dataset\\3.8.0\\exceldatareader.dataset.3.8.0.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\excelnumberformat\\1.1.0\\excelnumberformat.1.1.0.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\rbush.signed\\4.0.0\\rbush.signed.4.0.0.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\sixlabors.fonts\\1.0.0\\sixlabors.fonts.1.0.0.nupkg.sha512",
+    "C:\\Users\\Дмитрий\\.nuget\\packages\\system.io.packaging\\8.0.1\\system.io.packaging.8.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
