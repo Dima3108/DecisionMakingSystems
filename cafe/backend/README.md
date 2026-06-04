@@ -157,3 +157,12 @@ Para hacer cambios al backend:
 
 **Creado para:** Dmitri Pavlov (mayo 2026)  
 **Stack:** ASP.NET Core 8.0, Minimal APIs
+
+
+---
+
+<a href="https://github.com/Dima3108/Fuzzy-Logic-Sharp">Подробнее про библиотеку нечетких правил
+</a>
+
+
+---
