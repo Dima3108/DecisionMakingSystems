@@ -1,65 +1,48 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿using System;
+using FuzzyRestaurantEvaluation.Rules;
 
-// Agregar CORS
-builder.Services.AddCors(options =>
+namespace FuzzyRestaurantEvaluation
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    class Program
     {
-        policy
-            .WithOrigins("http://localhost:5173", "http://localhost:3000", "https://joantarazona99.github.io", "https://389d14fd.cafe-133.pages.dev", "https://cafe-133.pages.dev")
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
-});
+        static void Main(string[] args)
+        {
+            Console.WriteLine("=".PadRight(70, '='));
+            Console.WriteLine("НЕЧЁТКАЯ СИСТЕМА ОЦЕНКИ ЗАВЕДЕНИЙ");
+            Console.WriteLine("Правила Максима (строки 1-19)");
+            Console.WriteLine("Вход: A(D_код), C(E_код), E(F_код)");
+            Console.WriteLine("Выход: L (0=низкая, 1=средняя, 2=высокая)");
+            Console.WriteLine("=".PadRight(70, '='));
+            Console.WriteLine();
 
-var app = builder.Build();
+            MaximRules.Initialize();
+            Console.WriteLine("✅ Система нечётких правил инициализирована\n");
 
-// Servir archivos estáticos del frontend (wwwroot/)
-app.UseDefaultFiles();
-app.UseStaticFiles();
+            Console.WriteLine("ТЕСТОВЫЕ ПРИМЕРЫ:");
+            Console.WriteLine("-".PadRight(70, '-'));
 
-// Usar CORS
-app.UseCors("AllowFrontend");
+            var testCases = new[]
+            {
+                new { A = 0.0, C = 0.0, E = 1.0, Name = "Низкая конкуренция (0), Бесплатная парковка (0), Вход с улицы (1)" },
+                new { A = 1.0, C = 1.0, E = 0.0, Name = "Средняя конкуренция (1), Платная парковка (1), Вход через ТЦ (0)" },
+                new { A = 2.0, C = 2.0, E = 3.0, Name = "Высокая конкуренция (2), Нет парковки (2), Вход через здание (3)" },
+                new { A = 0.0, C = 0.0, E = 2.0, Name = "Низкая конкуренция (0), Бесплатная парковка (0), Вход через арку (2)" },
+                new { A = 2.0, C = 1.0, E = 1.0, Name = "Высокая конкуренция (2), Платная парковка (1), Вход с улицы (1)" },
+            };
 
-// Endpoint para recibir datos del formulario
-app.MapPost("/api/cafe/analyze", (CafeRequest request) =>
-{
-    // Imprimir datos en consola
-    Console.WriteLine("=== ЗАПРОС НА АНАЛИЗ КАФЕ ===");
-    Console.WriteLine($"Клиент: {request.Customer}");
-    Console.WriteLine($"Кухня: {request.Cuisine}");
-    Console.WriteLine($"Расположение: {request.Location}");
-    Console.WriteLine($"Конкуренты: {request.Competitors}");
-    Console.WriteLine($"Парковка: {request.Parking}");
-    Console.WriteLine($"Вход: {request.Entrance}");
-    Console.WriteLine($"Средний чек: {request.AvgCheck}");
-    Console.WriteLine($"Якорь: {request.Anchor}");
-    Console.WriteLine($"Заметки: {request.Notes}");
-    Console.WriteLine($"Дата и время: {request.Timestamp}");
-    Console.WriteLine("=============================\n");
+            foreach (var test in testCases)
+            {
+                double result = MaximRules.Evaluate(test.A, test.C, test.E);
+                int intResult = MaximRules.EvaluateInt(test.A, test.C, test.E);
+                string resultText = intResult == 0 ? "НИЗКАЯ" : (intResult == 1 ? "СРЕДНЯЯ" : "ВЫСОКАЯ");
 
-    // Retornar string de respuesta
-    return $"Анализ завершён для {request.Customer} — {request.Timestamp}";
-})
-.WithName("AnalyzeCafe");
+                Console.WriteLine($"\n{test.Name}");
+                Console.WriteLine($"  A={test.A}, C={test.C}, E={test.E} → Прогноз = {result:F2} → {resultText}");
+            }
 
-// Health check
-app.MapGet("/health", () => "OK")
-    .WithName("Health");
-
-app.Run();
-
-// Modelo para recibir datos del formulario
-public class CafeRequest
-{
-    public string? Customer { get; set; }
-    public string? Cuisine { get; set; }
-    public string? Location { get; set; }
-    public int Competitors { get; set; }
-    public string? Parking { get; set; }
-    public string? Entrance { get; set; }
-    public int AvgCheck { get; set; }
-    public string? Anchor { get; set; }
-    public string? Notes { get; set; }
-    public string? Timestamp { get; set; }
+            Console.WriteLine("\n" + "=".PadRight(70, '='));
+            Console.WriteLine("Нажмите любую клавишу для выхода...");
+            Console.ReadKey();
+        }
+    }
 }
