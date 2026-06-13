@@ -1,4 +1,4 @@
-﻿using Accord.Fuzzy;
+﻿using FLS.Accord.Fuzzy;
 
 namespace FuzzyRestaurantEvaluation.Models
 {
