@@ -1,5 +1,6 @@
+﻿using FuzzyRestaurantEvaluation.Models;
 var builder = WebApplication.CreateBuilder(args);
-
+MaximRules mr=new MaximRules();
 // Agregar CORS
 builder.Services.AddCors(options =>
 {
@@ -37,8 +38,18 @@ app.MapPost("/api/cafe/analyze", (CafeRequest request) =>
     Console.WriteLine($"Заметки: {request.Notes}");
     Console.WriteLine($"Дата и время: {request.Timestamp}");
     Console.WriteLine("=============================\n");
+ string []D={"High","Medium","Low"};//Конкуренты
+ string[]E={"Paid","None","Free"};//Парковка
+ string[]F={"Through the arch","Through the building","Through the mall","From the street"};//тип входа
 
     // Retornar string de respuesta
+    int d=Math.Min(2,request.Competitors);
+    int e=Math.Max(0,Array.IndexOf(E,request.Parking));
+    int f=Math.Max(0,Array.IndexOf(F,request.Entrance));
+    //Array.IndexOf(D,)
+    //Evaluate(double dCode, double eCode, double fCode)
+    var res_=mr.Evaluate(d,e,f);
+    Console.WriteLine(res_);
     return $"Анализ завершён для {request.Customer} — {request.Timestamp}";
 })
 .WithName("AnalyzeCafe");
