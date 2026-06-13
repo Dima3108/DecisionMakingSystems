@@ -6,7 +6,7 @@ namespace FuzzyRestaurantEvaluation.Models
 {
     public class MaximRules
     {
-        public IFuzzyEngine _fuzzyEngine;
+        private IFuzzyEngine _fuzzyEngine;
         private LinguisticVariable _dVar;
         private LinguisticVariable _eVar;
         private LinguisticVariable _fVar;

@@ -5,18 +5,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
- <ItemGroup>
+
+<ItemGroup>
   <Reference Include="FLS">
       <HintPath>FLS.dll</HintPath>
     </Reference>
  </ItemGroup>
-<ItemGroup>
-<Compile Remove="N_Output.cs"/>
-<Compile Remove="MaximRules.cs"/>
-<Compile Remove="E_Parking.cs"/>
-<Compile Remove="F_Entrance.cs"/>
-<Compile Remove="D_Competitors.cs"/>
-</ItemGroup>
   <Target Name="BuildFrontend" BeforeTargets="Build">
     <Exec Command="npm run build:backend" WorkingDirectory=".." />
   </Target>
