@@ -11,8 +11,8 @@
       <HintPath>FLS.dll</HintPath>
     </Reference>
  </ItemGroup>
-  <Target Name="BuildFrontend" BeforeTargets="Build">
+ <!-- <Target Name="BuildFrontend" BeforeTargets="Build">
     <Exec Command="npm run build:backend" WorkingDirectory=".." />
-  </Target>
+  </Target>-->
 
 </Project>

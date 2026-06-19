@@ -23,7 +23,7 @@ app.UseStaticFiles();
 app.UseCors("AllowFrontend");
 
 // Endpoint para recibir datos del formulario
-app.MapPost("/api/cafe/analyze", (CafeRequest request) =>
+app.MapPost("/api/cafe/analyze", (CafeRequest request,HttpContext context) =>
 {
     // Imprimir datos en consola
     Console.WriteLine("=== ЗАПРОС НА АНАЛИЗ КАФЕ ===");
@@ -50,10 +50,22 @@ app.MapPost("/api/cafe/analyze", (CafeRequest request) =>
     //Evaluate(double dCode, double eCode, double fCode)
     var res_=mr.Evaluate(d,e,f);
     Console.WriteLine(res_);
+
+string[]R=new string[]{"Предполагаемый рейтинг меньше 2.51","Предполагаемый рейтинг от 2.51 до 4.51","Предполагаемый рейтинг выше 4.51"};
+    //cooke
+    var options = new CookieOptions
+    {
+        HttpOnly =false,
+        Secure = false,
+        SameSite = SameSiteMode.Lax,
+        Expires = DateTimeOffset.UtcNow.AddSeconds(30*3)
+    };
+    context.Response.Cookies.Append("UserResult",$"Ваш предполагаемый рейтинг от {res_} до {res_+1} звезд " , options);
+
     return $"Анализ завершён для {request.Customer} — {request.Timestamp}";
 })
 .WithName("AnalyzeCafe");
-
+//dotnet run CafeBackend.csproj
 // Health check
 app.MapGet("/health", () => "OK")
     .WithName("Health");
